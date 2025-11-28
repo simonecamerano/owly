@@ -44,88 +44,62 @@ export async function fetchBook() {
         const loadingDiv = document.getElementById( 'loading' );
         loadingDiv.style.display = 'block';
 
-        // Create all cards with Promises to wait for image loading
-        const cardPromises = data.works.map( ( work ) => {
-            return new Promise( ( resolve ) => {
-                // Timeout after 5 seconds if image doesn't load
-                const timeout = setTimeout( () => {
-                    resolve( card );
-                }, 2000 );
+        // Create and display all cards immediately images load progressively
 
-                // Card
-                const card = document.createElement( 'article' );
-                card.className = 'book-card';
-                card.setAttribute( 'role', 'article' );
-                card.setAttribute( 'tabindex', '0' );
-                card.setAttribute( 'aria-label', `${work.title} - Click for more details` );
 
-                // Title
-                const titleElement = document.createElement( 'h3' );
-                titleElement.textContent = work.title;
+        data.works.forEach((work) => {
+            const card = document.createElement('article');
+            card.className = 'book-card';
+            card.setAttribute('role', 'article');
+            card.setAttribute('tabindex', '0');
+            card.setAttribute('aria-label', `${work.title} - Click for more details`);
 
-                // Image with get for safe access
-                const imgElement = document.createElement( 'img' );
-                const coverId = get( work, 'cover_id' );
-                const coverEditionKey = get( work, 'cover_edition_key' );
+            // Title
+            const titleElement = document.createElement('h3');
+            titleElement.textContent = work.title;
 
-                // Set explicit dimensions to prevent layout shift
-                imgElement.width = 180;
-                imgElement.height = 270;
-                imgElement.loading = 'lazy';
+            // Image
+            const imgElement = document.createElement('img');
+            const coverId = get(work, 'cover_id');
+            const coverEditionKey = get(work, 'cover_edition_key');
+            imgElement.width = 180;
+            imgElement.height = 270;
+            imgElement.loading = 'lazy';
+            if (coverId) {
+                imgElement.src = `https://covers.openlibrary.org/b/id/${coverId}-M.jpg`;
+            } else if (coverEditionKey) {
+                imgElement.src = `https://covers.openlibrary.org/b/olid/${coverEditionKey}-M.jpg`;
+            } else {
+                imgElement.src = 'https://openlibrary.org/images/icons/avatar_book-sm.png';
+            }
+            imgElement.alt = get(work, 'title', 'Book');
+            imgElement.onerror = function () {
+                this.src = 'https://openlibrary.org/images/icons/avatar_book-lg.png';
+            };
 
-                if ( coverId ) {
-                    imgElement.src = `https://covers.openlibrary.org/b/id/${coverId}-M.jpg`;
-                } else if ( coverEditionKey ) {
-                    imgElement.src = `https://covers.openlibrary.org/b/olid/${coverEditionKey}-M.jpg`;
-                } else {
-                    imgElement.src = 'https://openlibrary.org/images/icons/avatar_book-sm.png';
+            // Author
+            const authorElement = document.createElement('p');
+            const authorName = get(work, 'authors[0].name', 'Unknown author');
+            authorElement.textContent = authorName;
+
+            card.appendChild(titleElement);
+            card.appendChild(imgElement);
+            card.appendChild(authorElement);
+
+            // Add click listener to show description
+            card.addEventListener('click', () => showBookDescription(work));
+            // Add keyboard support
+            card.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    showBookDescription(work);
                 }
+            });
 
-                imgElement.alt = get( work, 'title', 'Book' );
-
-                // When image is loaded
-                imgElement.onload = () => {
-                    clearTimeout( timeout );
-                    resolve( card );
-                };
-
-                // If image fails, use placeholder and resolve anyway
-                imgElement.onerror = function () {
-                    clearTimeout( timeout );
-                    this.src = 'https://openlibrary.org/images/icons/avatar_book-lg.png';
-                    this.onload = () => resolve( card );
-                };
-
-                // Author with get for safe access
-                const authorElement = document.createElement( 'p' );
-                const authorName = get( work, 'authors[0].name', 'Unknown author' );
-                authorElement.textContent = authorName;
-
-                card.appendChild( titleElement );
-                card.appendChild( imgElement );
-                card.appendChild( authorElement );
-
-                // Add click listener to show description
-                card.addEventListener( 'click', () => showBookDescription( work ) );
-
-                // Add keyboard support
-                card.addEventListener( 'keypress', ( e ) => {
-                    if ( e.key === 'Enter' || e.key === ' ' ) {
-                        e.preventDefault();
-                        showBookDescription( work );
-                    }
-                } );
-            } );
-        } );
-
-        // Wait for all images to load
-        const cards = await Promise.all( cardPromises );
-
-        // Hide loading and show cards
+            appDiv.appendChild(card);
+        });
+        // Hide loading spinner
         loadingDiv.style.display = 'none';
-        cards.forEach( ( card ) => {
-            appDiv.appendChild( card );
-        } );
     }
     catch ( error ) {
         console.error( error );
@@ -196,12 +170,16 @@ async function showBookDescription( work ) {
             } );
 
             // ESC key to close
-            document.addEventListener( 'keydown', ( e ) => {
-                if ( e.key === 'Escape' && modal.style.display === 'block' ) {
-                    modal.style.display = 'none';
-                    document.body.style.overflow = '';
-                }
-            } );
+            document.addEventListener( 'keydown', escModalHandler );
+        }
+
+        // Handler globale per ESC
+        function escModalHandler( e ) {
+            const modal = document.getElementById( 'book-modal' );
+            if ( e.key === 'Escape' && modal && modal.style.display === 'block' ) {
+                modal.style.display = 'none';
+                document.body.style.overflow = '';
+            }
         }
 
         // Show loading

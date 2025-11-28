@@ -16,7 +16,7 @@ module.exports = {
   },
   
   // Development mode (change to 'production' for production)
-  mode: 'development',
+  mode: 'production',
   
   // Source maps for debugging
   devtool: 'inline-source-map',
