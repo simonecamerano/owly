@@ -87,14 +87,13 @@ export async function fetchBook() {
             card.appendChild( authorElement );
 
             // Add click listener to show description
-            card.addEventListener( 'click', () => showBookDescription( work ) );
-            // Add keyboard support
-            card.addEventListener( 'keypress', ( e ) => {
-                if ( e.key === 'Enter' || e.key === ' ' ) {
+            card.addEventListener('click', () => showBookDescription(work));
+            card.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
                     e.preventDefault();
-                    showBookDescription( work );
+                    showBookDescription(work);
                 }
-            } );
+            });
             // Function to show book description in a modal
             async function showBookDescription( work ) {
                 try {
