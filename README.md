@@ -71,7 +71,7 @@ A modern, responsive web application for searching and exploring books by catego
 
 1. **Clone the repository**
 ```bash
-git clone https://github.com/Galdrial/owly.git
+git clone https://github.com/simonecamerano/owly.git
 cd owly
 ```
 
@@ -262,9 +262,9 @@ This project is licensed under the MIT License.
 
 ## 👤 Author
 
-**Galdrial**
-- GitHub: [@Galdrial](https://github.com/Galdrial)
-- Project: [Owly](https://github.com/Galdrial/owly)
+**Simone Camerano**
+- GitHub: [@simonecamerano](https://github.com/simonecamerano)
+- Project: [Owly](https://github.com/simonecamerano/owly)
 
 ## 🙏 Acknowledgments
 
